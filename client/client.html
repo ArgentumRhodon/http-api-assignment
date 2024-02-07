@@ -20,12 +20,10 @@
           rawData.textContent = resText;
 
           if (contentType === "application/json") {
-            // JSON
             const parsedResponse = JSON.parse(resText);
             h1.textContent = `Name: ${parsedResponse.name}`;
             p.textContent = `Number of petals: ${parsedResponse.petals}`;
           } else if (contentType === "text/xml") {
-            // XML
             const parsedResponse = new window.DOMParser().parseFromString(
               resText,
               "text/html"
