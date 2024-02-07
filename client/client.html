@@ -1,32 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>Our simple HTTP server</title>
-  <link rel="stylesheet" type="text/css" href="/style.css">
-  
-  <script>
+  <head>
+    <title>Our simple HTTP server</title>
+    <link rel="stylesheet" type="text/css" href="/style.css" />
 
-  </script>
-</head>
-<body>
-  <section id="top">
-    <h3>Status Code Tests</h3>
-    <select id="page">
-      <option value="/success">Success</option>
-      <option value="/badRequest">Bad Request</option>
-      <option value="/unauthorized">Unauthorized</option>
-      <option value="/forbidden">Forbidden</option>
-      <option value="/internal">Internal</option>
-      <option value="/notImplemented">Not Implemented</option>
-      <option value="/notFound">Not Found</option>
-    </select>
-    <select id="type">
-      <option value="application/json">JSON</option>
-      <option value="text/xml">XML</option>
-    </select>
-    <button id="send">Send</button>
-  </section>
-  <section id="content">
-  </section>
-</body>
+    <script>
+      const handleResponse = (response) => {
+        response.text().then((resText) => {
+          const contentType = response.headers.get("Content-Type");
+          const content = document.querySelector("content");
+          content.appendChild(document.createElement("hr"));
+
+          const h1 = document.createElement("h1");
+          const p = document.createElement("p");
+          const h2 = document.createElement("h2");
+          const rawData = document.createElement("p");
+
+          h2.textContent = contentType;
+          rawData.textContent = resText;
+
+          if (contentType === "application/json") {
+            // JSON
+            const parsedResponse = JSON.parse(resText);
+            h1.textContent = `Name: ${parsedResponse.name}`;
+            p.textContent = `Number of petals: ${parsedResponse.petals}`;
+          } else if (contentType === "text/xml") {
+            // XML
+            const parsedResponse = new window.DOMParser().parseFromString(
+              resText,
+              "text/html"
+            );
+            h1.textContent =
+              "Name: " + parsedResponse.querySelector("name").textContent;
+            p.textContent =
+              "Age: " + parsedResponse.querySelector("petals").textContent;
+          }
+
+          content.appendChild(h1);
+          content.appendChild(h1);
+          content.appendChild(h2);
+          content.appendChild(rawData);
+        });
+      };
+
+      const sendFecthRequest = (url, acceptedType) => {
+        const options = {
+          method: "GET",
+          headers: { Accept: acceptedType },
+        };
+        fetch(url, options).then((response) => {
+          handleResponse(response);
+        });
+      };
+
+      const init = () => {
+        const sendButton = document.querySelector("#send");
+        sendButton.onclick = () => {
+          const url = document.querySelector("#page").value;
+          const type = document.querySelector("#type").value;
+
+          sendFecthRequest(url, type);
+        };
+      };
+    </script>
+  </head>
+  <body>
+    <section id="top">
+      <h3>Status Code Tests</h3>
+      <select id="page">
+        <option value="/success">Success</option>
+        <option value="/badRequest">Bad Request</option>
+        <option value="/unauthorized">Unauthorized</option>
+        <option value="/forbidden">Forbidden</option>
+        <option value="/internal">Internal</option>
+        <option value="/notImplemented">Not Implemented</option>
+        <option value="/notFound">Not Found</option>
+      </select>
+      <select id="type">
+        <option value="application/json">JSON</option>
+        <option value="text/xml">XML</option>
+      </select>
+      <button id="send">Send</button>
+    </section>
+    <section id="content"></section>
+  </body>
 </html>
